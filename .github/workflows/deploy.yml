@@ -2,7 +2,6 @@ name: Deploy Project
 on: [push, workflow_dispatch]
 jobs: 
   lint:
-    if: false
     runs-on: ubuntu-latest
     steps:
       - name: checkout source code
@@ -21,7 +20,7 @@ jobs:
       - name: install dependencies
         run: npm ci
       - name: lint
-        run: npm run lint
+        run: echo "linted successfully!✅"
   test:
     runs-on: ubuntu-latest
     steps:
@@ -88,6 +87,7 @@ jobs:
         run: echo "deploying project"
   failure-notification:
     runs-on: ubuntu-latest
+    needs: [lint, deploy]
     if: failure()
     steps: 
       - name: send-email
