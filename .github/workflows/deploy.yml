@@ -12,12 +12,14 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
-      - name: cache npm 
+      - name: cache npm
+        id: cache
         uses: actions/cache@v3
         with: 
-          path: ~/.npm
+          path: node_modules
           key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
       - name: install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
       - name: lint
         run: echo "linted successfully!✅"
@@ -33,11 +35,13 @@ jobs:
         with:
           node-version: 18
       - name: cache npm 
+        id: cache
         uses: actions/cache@v3
         with: 
           path: ~/.npm
           key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
       - name: install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
       - name: run tests
         id: run-tests
@@ -61,11 +65,13 @@ jobs:
         with:
           node-version: 18
       - name: cache npm 
+        id: cache
         uses: actions/cache@v3
         with: 
           path: ~/.npm
           key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
       - name: install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
       - name: build project
         run: npm run build
