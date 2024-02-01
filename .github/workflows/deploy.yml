@@ -47,7 +47,6 @@ jobs:
         with: 
           name: drop-${{ github.run_id }}-${{ github.run_attempt }}
           path: ./dist
-          overwrite: true
   deploy: 
     runs-on: ubuntu-latest
     needs: build
