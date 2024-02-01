@@ -24,7 +24,6 @@ jobs:
         run: npm run lint
   test:
     runs-on: ubuntu-latest
-    needs: lint
     steps:
       - name: checkout source code
         uses: actions/checkout@v3
