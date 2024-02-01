@@ -1,0 +1,97 @@
+name: Using Reusable Workflow
+on:
+  push: 
+    branches: 
+      - main   
+jobs: 
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout source code
+        uses: actions/checkout@v3
+        with: 
+          repository: ${{github.repository}}
+      - name: install nodejs
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: cache npm
+        id: cache
+        uses: actions/cache@v3
+        with: 
+          path: node_modules
+          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
+      - name: install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci
+      - name: lint
+        run: echo "linted successfully!✅"
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout source code
+        uses: actions/checkout@v3
+        with: 
+          repository: ${{github.repository}}
+      - name: install nodejs
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: cache npm 
+        id: cache
+        uses: actions/cache@v3
+        with: 
+          path: ~/.npm
+          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
+      - name: install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci
+      - name: run tests
+        id: run-tests
+        run: npm test
+      - name: upload test report
+        if: failure() && steps.run-tests.outcome == 'failure'
+        uses: actions/upload-artifact@v3
+        with: 
+          name: test-report
+          path: test.json
+  build: 
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: checkout source code
+        uses: actions/checkout@v3
+        with: 
+          repository: ${{github.repository}}
+      - name: install nodejs
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: cache npm 
+        id: cache
+        uses: actions/cache@v3
+        with: 
+          path: ~/.npm
+          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
+      - name: install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci
+      - name: build project
+        run: npm run build
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with: 
+          name: drop-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ./dist
+  deploy: 
+    needs: build
+    uses: ./.github/workflows/reusable.yml
+  failure-notification:
+    runs-on: ubuntu-latest
+    needs: [lint, deploy]
+    if: failure()
+    steps: 
+      - name: send-email
+        run: echo "Help! the pipeline is on fire!🔥" 
+
+      
