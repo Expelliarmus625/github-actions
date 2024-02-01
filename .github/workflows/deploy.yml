@@ -86,4 +86,11 @@ jobs:
           name: drop-${{ github.run_id }}-${{ github.run_attempt }}
       - name: deploy project
         run: echo "deploying project"
+  failure-notification:
+    runs-on: ubuntu-latest
+    if: failure()
+    steps: 
+      - name: send-email
+        run: echo "Help! the pipeline is on fire!🔥" 
+
       
