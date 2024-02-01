@@ -42,10 +42,9 @@ jobs:
         run: npm ci
       - name: run tests
         id: run-tests
-        continue-on-error: true
         run: npm test
       - name: upload test report
-        if: steps.run-tests.outcome == 'failure'
+        if: failure() && steps.run-tests.outcome == 'failure'
         uses: actions/upload-artifact@v3
         with: 
           name: test-report
