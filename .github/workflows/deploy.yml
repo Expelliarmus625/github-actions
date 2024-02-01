@@ -1,6 +1,26 @@
 name: Deploy Project
 on: [push, workflow_dispatch]
 jobs: 
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout source code
+        uses: actions/checkout@v3
+        with: 
+          repository: ${{github.repository}}
+      - name: install nodejs
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: cache npm 
+        uses: actions/cache@v3
+        with: 
+          path: ~/.npm
+          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
+      - name: install dependencies
+        run: npm ci
+      - name: lint
+        run: npm run lint
   test:
     runs-on: ubuntu-latest
     steps:
@@ -21,6 +41,11 @@ jobs:
         run: npm ci
       - name: run tests
         run: npm test
+      - name: upload test report
+        uses: actions/upload-artifact@v3
+        with: 
+          name: test-report
+          path: test.json
   build: 
     runs-on: ubuntu-latest
     needs: test
